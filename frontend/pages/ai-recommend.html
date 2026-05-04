@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI سفارش — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+  <style>
+    .thinking-anim { display:flex; gap:6px; justify-content:center; margin:12px 0; }
+    .thinking-anim span {
+      width:10px; height:10px; border-radius:50%;
+      background:var(--flame-glow);
+      animation:bounce 1.4s infinite both;
+    }
+    .thinking-anim span:nth-child(2) { animation-delay:0.2s; }
+    .thinking-anim span:nth-child(3) { animation-delay:0.4s; }
+    @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+  </style>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+
+  <div class="page-header">
+    <h1 class="page-title-ur ur-only">🤖 AI <span style="color:var(--flame)">سفارش</span></h1>
+    <h1 class="page-title en-only" style="display:none;">🤖 AI <span>Recommendation</span></h1>
+    <p class="page-subtitle" data-ur="اپنا مسئلہ بتائیں — AI بہترین کاریگر تجویز کرے گا!" data-en="Describe your problem — AI will suggest the best worker!">اپنا مسئلہ بتائیں — AI بہترین کاریگر تجویز کرے گا!</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:480px 1fr;gap:28px;align-items:start;">
+
+    <!-- Form -->
+    <div class="form-section">
+      <div class="form-section-title">
+        <i class="fas fa-magic" style="color:var(--flame);"></i>
+        <span data-ur="اپنی ضرورت بتائیں" data-en="Tell Us Your Need">اپنی ضرورت بتائیں</span>
+      </div>
+
+      <div id="form-alert" class="uj-alert"></div>
+
+      <form id="aiForm">
+        <div class="field">
+          <label data-ur="خدمت کی قسم *" data-en="Service Type *">خدمت کی قسم *</label>
+          <select id="service_type" required>
+            <option value="" data-ur="-- منتخب کریں --" data-en="-- Select --">-- منتخب کریں --</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label data-ur="مسئلہ تفصیل سے بتائیں *" data-en="Describe Your Problem *">مسئلہ تفصیل سے بتائیں *</label>
+          <textarea id="problem_description" rows="4"
+            data-ph-ur="مثلاً: گھر میں بجلی نہیں آ رہی، سوئچ بورڈ خراب ہو گیا، نیا پنکھا لگوانا ہے..."
+            data-ph-en="E.g.: No electricity at home, switchboard broken, need new fan installed..."
+            placeholder="مثلاً: گھر میں بجلی نہیں آ رہی، سوئچ بورڈ خراب ہو گیا..." required></textarea>
+        </div>
+
+        <div class="two-col">
+          <div class="field" style="margin-bottom:0;">
+            <label data-ur="شہر *" data-en="City *">شہر *</label>
+            <select id="city" required>
+              <option value="">--</option>
+              <option value="Islamabad">اسلام آباد</option>
+              <option value="Rawalpindi">راولپنڈی</option>
+              <option value="Lahore">لاہور</option>
+              <option value="Karachi">کراچی</option>
+              <option value="Faisalabad">فیصل آباد</option>
+              <option value="Multan">ملتان</option>
+              <option value="Peshawar">پشاور</option>
+              <option value="Quetta">کوئٹہ</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label data-ur="بجٹ (اختیاری)" data-en="Budget (Optional)">بجٹ (اختیاری)</label>
+            <input type="number" id="budget"
+              data-ph-ur="₨ رقم"
+              data-ph-en="₨ Amount"
+              placeholder="₨ رقم"/>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label data-ur="علاقہ (اختیاری)" data-en="Area (Optional)">علاقہ (اختیاری)</label>
+          <input type="text" id="area"
+            data-ph-ur="مثلاً: G-11، DHA، گلبرگ..."
+            data-ph-en="E.g.: G-11, DHA, Gulberg..."
+            placeholder="مثلاً: G-11، DHA..."/>
+        </div>
+
+        <button type="submit" class="btn-primary" id="aiBtn"
+          style="width:100%;justify-content:center;font-size:18px;padding:18px;"
+          data-ur="AI سے بہترین کاریگر ڈھونڈو" data-en="Find Best Worker with AI">
+          <div class="spin"></div>
+          <span class="btn-text" data-ur="🤖 AI سے بہترین کاریگر ڈھونڈو" data-en="🤖 Find Best Worker with AI">🤖 AI سے بہترین کاریگر ڈھونڈو</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <div id="ai-results-section">
+
+      <!-- Initial -->
+      <div id="ai-initial" style="text-align:center;padding:56px 24px;background:white;border-radius:var(--radius-md);border:2px dashed var(--border);">
+        <div style="font-size:64px;margin-bottom:20px;">🤖</div>
+        <h3 class="ur-only" style="font-family:var(--font-urdu);font-size:24px;font-weight:700;color:var(--ink-mid);margin-bottom:10px;">AI تیار ہے!</h3>
+        <h3 class="en-only" style="display:none;font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--ink-mid);margin-bottom:10px;">AI is Ready!</h3>
+        <p class="ur-only" style="font-family:var(--font-urdu);font-size:17px;color:var(--ink-faint);line-height:1.8;direction:rtl;">بائیں طرف فارم بھریں<br/>AI آپ کے لیے بہترین کاریگر منتخب کرے گا</p>
+        <p class="en-only" style="display:none;font-family:var(--font-body);font-size:15px;color:var(--ink-faint);line-height:1.7;">Fill the form on the left<br/>AI will select the best worker for you</p>
+      </div>
+
+      <!-- Thinking -->
+      <div id="ai-thinking" style="display:none;text-align:center;padding:56px 24px;background:white;border-radius:var(--radius-md);border:1px solid var(--border);">
+        <div style="font-size:56px;margin-bottom:16px;">🤖</div>
+        <h3 class="ur-only" style="font-family:var(--font-urdu);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px;">AI سوچ رہا ہے...</h3>
+        <h3 class="en-only" style="display:none;font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px;">AI is thinking...</h3>
+        <div class="thinking-anim"><span></span><span></span><span></span></div>
+        <p class="ur-only" style="font-family:var(--font-urdu);font-size:16px;color:var(--ink-soft);direction:rtl;">کاریگروں کا تجزیہ ہو رہا ہے — ایک لمحہ!</p>
+        <p class="en-only" style="display:none;font-family:var(--font-body);font-size:14px;color:var(--ink-soft);">Analyzing workers — one moment!</p>
+      </div>
+
+      <!-- Results -->
+      <div id="ai-results" style="display:none;">
+        <h3 class="ur-only" style="font-family:var(--font-urdu);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:20px;direction:rtl;text-align:right;">✅ AI کی بہترین سفارشات</h3>
+        <h3 class="en-only" style="display:none;font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--ink);margin-bottom:20px;">✅ AI Top Recommendations</h3>
+        <div id="results-list"></div>
+        <div id="ai-tip-box"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  buildSidebar('ai-recommend');
+
+  $.get(`${API_BASE}/workers/categories`, function(res) {
+    if (res.success) {
+      res.categories.forEach(c => {
+        $('#service_type').append(`<option value="${c.name}">${c.name}</option>`);
+      });
+    }
+  });
+});
+
+$('#aiForm').on('submit', function(e) {
+  e.preventDefault();
+
+  const data = {
+    service_type:        $('#service_type').val(),
+    problem_description: $('#problem_description').val().trim(),
+    city:                $('#city').val(),
+    area:                $('#area').val().trim(),
+    budget:              $('#budget').val()
+  };
+
+  if (!data.service_type || !data.problem_description || !data.city) {
+    const el = document.getElementById('form-alert');
+    el.className = 'uj-alert uj-alert-error show';
+    el.textContent = Lang.current==='en'
+      ? 'Please fill service type, problem and city.'
+      : 'خدمت، مسئلہ اور شہر ضرور بھریں۔';
+    return;
+  }
+
+  setLoading('aiBtn', true);
+  document.getElementById('ai-initial').style.display = 'none';
+  document.getElementById('ai-results').style.display  = 'none';
+  document.getElementById('ai-thinking').style.display = 'block';
+  document.getElementById('form-alert').classList.remove('show');
+
+  $.ajax({
+    url: `${API_BASE}/ai/recommend`,
+    method: 'POST',
+    headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify(data),
+    success: function(res) {
+      document.getElementById('ai-thinking').style.display = 'none';
+      setLoading('aiBtn', false);
+
+      if (!res.success || !res.recommendations.length) {
+        const el = document.getElementById('form-alert');
+        el.className = 'uj-alert uj-alert-error show';
+        el.textContent = res.ai_message || (Lang.current==='en'?'No workers found. Try another city.':'کوئی کاریگر نہیں ملا۔ دوسرا شہر آزمائیں۔');
+        document.getElementById('ai-initial').style.display = 'block';
+        return;
+      }
+
+      const medals = ['🥇','🥈','🥉'];
+      const colors = ['#E8400C','#2563EB','#059669'];
+      let html = '';
+
+      res.recommendations.forEach((w, i) => {
+        html += `
+          <div class="ai-result-card">
+            <div class="rank-medal">${medals[i]||'🏅'}</div>
+
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+              <div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,${colors[i%colors.length]},${colors[(i+1)%colors.length]});
+                display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:white;
+                font-family:var(--font-display);flex-shrink:0;">
+                ${w.full_name.charAt(0)}
+              </div>
+              <div>
+                <h4 style="font-family:var(--font-body);font-size:18px;font-weight:800;color:var(--ink);">${w.full_name}</h4>
+                <p style="font-size:13px;color:var(--flame);font-weight:600;font-family:var(--font-body);">${w.category_name}</p>
+              </div>
+            </div>
+
+            <div style="font-size:13px;color:var(--ink-mid);font-family:var(--font-body);line-height:2;margin-bottom:12px;">
+              <div><i class="fas fa-briefcase" style="color:var(--flame-glow);width:16px;"></i> ${w.experience_years||0} ${Lang.current==='en'?'yrs exp':'سال تجربہ'}</div>
+              <div><i class="fas fa-map-marker-alt" style="color:var(--flame-glow);width:16px;"></i> ${w.city}${w.area?', '+w.area:''}</div>
+              <div><i class="fas fa-star" style="color:var(--gold);width:16px;"></i> ${w.avg_rating||'0'}/5 · ${w.total_jobs||0} ${Lang.current==='en'?'jobs':'کام'}</div>
+              <div><i class="fas fa-money-bill" style="color:var(--flame-glow);width:16px;"></i> ₨${w.hourly_rate||'—'}/${Lang.current==='en'?'hr':'گھنٹہ'}</div>
+            </div>
+
+            <div class="ai-reason-box">
+              <div class="ai-reason-label">🤖 AI ${Lang.current==='en'?'Reason':'وجہ'}</div>
+              <div class="ai-reason-text">${w.ai_reason}</div>
+            </div>
+
+            <div class="match-bar-wrap">
+              <div class="match-bar-label">
+                <span>${Lang.current==='en'?'Match Score':'AI میچ اسکور'}</span>
+                <strong style="color:var(--flame);">${w.match_score}%</strong>
+              </div>
+              <div class="match-bar">
+                <div class="match-fill" style="width:0%;" data-width="${w.match_score}%"></div>
+              </div>
+            </div>
+
+            <a href="/workers" class="btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:13px;">
+              <i class="fas fa-calendar-plus"></i>
+              <span data-ur="بک کریں" data-en="Book Now">بک کریں</span>
+            </a>
+          </div>`;
+      });
+
+      document.getElementById('results-list').innerHTML = html;
+
+      if (res.ai_tip) {
+        document.getElementById('ai-tip-box').innerHTML = `
+          <div style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(232,64,12,0.05));
+            border:1.5px solid rgba(245,158,11,0.3);border-radius:var(--radius-md);padding:20px;margin-top:4px;">
+            <p style="font-size:12px;font-weight:700;color:var(--gold-deep);margin-bottom:8px;font-family:var(--font-body);text-transform:uppercase;letter-spacing:0.5px;">
+              💡 ${Lang.current==='en'?'AI Tip':'AI مشورہ'}
+            </p>
+            <p style="font-family:var(--font-urdu);font-size:16px;color:var(--ink-mid);direction:rtl;text-align:right;line-height:1.8;">${res.ai_tip}</p>
+          </div>`;
+      }
+
+      document.getElementById('ai-results').style.display = 'block';
+      Lang.apply();
+
+      // Animate bars
+      setTimeout(() => {
+        document.querySelectorAll('.match-fill').forEach(bar => {
+          bar.style.width = bar.dataset.width;
+        });
+      }, 100);
+    },
+    error: function(xhr) {
+      document.getElementById('ai-thinking').style.display = 'none';
+      document.getElementById('ai-initial').style.display  = 'block';
+      setLoading('aiBtn', false);
+      const el = document.getElementById('form-alert');
+      el.className = 'uj-alert uj-alert-error show';
+      el.textContent = xhr.responseJSON?.message || (Lang.current==='en'?'AI error. Try again.':'AI غلطی۔ دوبارہ کوشش کریں۔');
+    }
+  });
+});
+</script>
+</body>
+</html>

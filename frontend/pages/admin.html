@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ایڈمن — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <h1 class="page-title-ur ur-only">ایڈمن <span style="color:var(--flame)">پینل</span> 🛡️</h1>
+      <h1 class="page-title en-only" style="display:none;">Admin <span>Panel</span> 🛡️</h1>
+    </div>
+    <span class="badge badge-flame" style="font-size:14px;padding:8px 18px;">
+      <i class="fas fa-shield-alt"></i> Admin
+    </span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-users" style="color:var(--flame);"></i></div>
+      <div class="stat-value" id="stat-users">—</div>
+      <div class="stat-label" data-ur="کل صارفین" data-en="Total Users">کل صارفین</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fas fa-hard-hat" style="color:#059669;"></i></div>
+      <div class="stat-value" id="stat-workers">—</div>
+      <div class="stat-label" data-ur="کاریگر" data-en="Workers">کاریگر</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon"><i class="fas fa-calendar-check" style="color:var(--gold-deep);"></i></div>
+      <div class="stat-value" id="stat-bookings">—</div>
+      <div class="stat-label" data-ur="کل بکنگز" data-en="Total Bookings">کل بکنگز</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fas fa-money-bill-wave" style="color:#2563EB;"></i></div>
+      <div class="stat-value" id="stat-revenue">₨—</div>
+      <div class="stat-label" data-ur="کل آمدنی" data-en="Total Revenue">کل آمدنی</div>
+    </div>
+  </div>
+
+  <!-- Section -->
+  <div class="uj-card">
+    <div class="uj-card-header">
+      <h3 id="section-title">
+        <i class="fas fa-users" style="color:var(--flame);"></i>
+        <span data-ur="تمام صارفین" data-en="All Users">تمام صارفین</span>
+      </h3>
+      <div class="filter-tabs" style="margin:0;gap:6px;">
+        <button class="filter-tab active" onclick="loadSection('users',this)" data-ur="صارفین" data-en="Users">صارفین</button>
+        <button class="filter-tab" onclick="loadSection('workers',this)" data-ur="کاریگر" data-en="Workers">کاریگر</button>
+        <button class="filter-tab" onclick="loadSection('bookings',this)" data-ur="بکنگز" data-en="Bookings">بکنگز</button>
+      </div>
+    </div>
+    <div id="admin-content" style="overflow-x:auto;"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  const user = Auth.getUser();
+  if (!user || user.role !== 'admin') { window.location.href='/login'; return; }
+  buildSidebar('admin');
+
+  $.ajax({
+    url: `${API_BASE}/admin/stats`,
+    headers: authHeader(),
+    success: function(res) {
+      if (res.success) {
+        document.getElementById('stat-users').textContent    = res.stats.users.total || 0;
+        document.getElementById('stat-workers').textContent  = res.stats.users.workers || 0;
+        document.getElementById('stat-bookings').textContent = res.stats.bookings.total || 0;
+        document.getElementById('stat-revenue').textContent  = '₨' + parseInt(res.stats.revenue||0).toLocaleString();
+      }
+    }
+  });
+
+  loadSection('users');
+});
+
+function loadSection(section, btn) {
+  if (btn) {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  document.getElementById('admin-content').innerHTML = `<div style="padding:32px;">${loadingSkeleton(5)}</div>`;
+
+  if (section === 'users' || section === 'workers') {
+    const role = section === 'workers' ? '?role=worker' : '';
+    $.ajax({
+      url: `${API_BASE}/admin/users${role}`,
+      headers: authHeader(),
+      success: function(res) {
+        if (!res.success) return;
+        const isEn = Lang.current === 'en';
+        let html = `<table class="uj-table"><thead><tr>
+          <th data-ur="#" data-en="#">#</th>
+          <th data-ur="نام" data-en="Name">نام</th>
+          <th data-ur="ای میل" data-en="Email">ای میل</th>
+          <th data-ur="کردار" data-en="Role">کردار</th>
+          <th data-ur="شہر" data-en="City">شہر</th>
+          <th data-ur="حالت" data-en="Status">حالت</th>
+          <th data-ur="اقدام" data-en="Action">اقدام</th>
+        </tr></thead><tbody>`;
+
+        res.users.forEach(u => {
+          html += `<tr>
+            <td style="color:var(--ink-faint);font-family:var(--font-body);">${u.id}</td>
+            <td><div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--flame),var(--flame-soft));
+                display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;font-family:var(--font-display);">
+                ${u.full_name.charAt(0)}
+              </div>
+              <strong>${u.full_name}</strong>
+            </div></td>
+            <td style="color:var(--ink-soft);font-size:13px;">${u.email}</td>
+            <td><span class="badge ${u.role==='worker'?'badge-green':u.role==='admin'?'badge-flame':'badge-blue'}">${u.role}</span></td>
+            <td>${u.city||'—'}</td>
+            <td><span class="badge ${u.is_active?'badge-green':'badge-red'}">${u.is_active?'Active':'Blocked'}</span></td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${u.role==='worker'?`<button onclick="verifyWorker(${u.id})" style="padding:5px 12px;background:var(--gold);color:var(--ink);border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+                <span data-ur="تصدیق" data-en="Verify">تصدیق</span>
+              </button>`:''}
+              <button onclick="toggleUser(${u.id},this)" style="padding:5px 12px;background:${u.is_active?'var(--danger)':'var(--success)'};color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+                <span>${u.is_active?(Lang.current==='en'?'Block':'بلاک'):(Lang.current==='en'?'Unblock':'فعال')}</span>
+              </button>
+            </td>
+          </tr>`;
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('admin-content').innerHTML = html;
+        Lang.apply();
+      }
+    });
+
+  } else if (section === 'bookings') {
+    $.ajax({
+      url: `${API_BASE}/admin/bookings`,
+      headers: authHeader(),
+      success: function(res) {
+        if (!res.success) return;
+        let html = `<table class="uj-table"><thead><tr>
+          <th>#</th>
+          <th data-ur="گاہک" data-en="Customer">گاہک</th>
+          <th data-ur="کاریگر" data-en="Worker">کاریگر</th>
+          <th data-ur="خدمت" data-en="Service">خدمت</th>
+          <th data-ur="تاریخ" data-en="Date">تاریخ</th>
+          <th data-ur="رقم" data-en="Amount">رقم</th>
+          <th data-ur="حالت" data-en="Status">حالت</th>
+        </tr></thead><tbody>`;
+
+        res.bookings.forEach(b => {
+          html += `<tr>
+            <td style="color:var(--ink-faint);">${b.id}</td>
+            <td><strong>${b.customer_name}</strong></td>
+            <td>${b.worker_name}</td>
+            <td>${b.category_name}</td>
+            <td>${fmtDate(b.scheduled_date)}</td>
+            <td><strong style="color:var(--flame);">₨${b.total_amount||'—'}</strong></td>
+            <td>${statusBadge(b.status)}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('admin-content').innerHTML = html;
+        Lang.apply();
+      }
+    });
+  }
+}
+
+function verifyWorker(userId) {
+  if (!confirm(Lang.current==='en'?'Verify this worker?':'اس کاریگر کی تصدیق کرنا چاہتے ہیں؟')) return;
+  $.ajax({
+    url: `${API_BASE}/admin/users/${userId}/verify`,
+    method: 'PUT', headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify({ badge:'basic' }),
+    success: function() {
+      alert(Lang.current==='en'?'✅ Worker verified!':'✅ کاریگر تصدیق شدہ!');
+      loadSection('workers');
+    }
+  });
+}
+
+function toggleUser(userId) {
+  if (!confirm(Lang.current==='en'?'Change user status?':'صارف کی حالت تبدیل کریں؟')) return;
+  $.ajax({
+    url: `${API_BASE}/admin/users/${userId}/toggle`,
+    method: 'PUT', headers: authHeader(),
+    success: function() { loadSection('users'); }
+  });
+}
+</script>
+</body>
+</html>

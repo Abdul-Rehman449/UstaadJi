@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>کاریگر تلاش کریں — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+
+  <div class="page-header">
+    <h1 class="page-title-ur ur-only">کاریگر <span style="color:var(--flame);">تلاش کریں</span> 🔍</h1>
+    <h1 class="page-title en-only" style="display:none;">Find <span>Workers</span> 🔍</h1>
+    <p class="page-subtitle" data-ur="اپنے شہر میں بہترین کاریگر منتخب کریں" data-en="Choose the best worker in your city">اپنے شہر میں بہترین کاریگر منتخب کریں</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="uj-card" style="margin-bottom:24px;">
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:16px;align-items:end;">
+      <div class="field" style="margin:0;">
+        <label data-ur="خدمت" data-en="Service Category">خدمت</label>
+        <select id="filter-category">
+          <option value="" data-ur="تمام خدمات" data-en="All Services">تمام خدمات</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label data-ur="شہر" data-en="City">شہر</label>
+        <select id="filter-city">
+          <option value="" data-ur="تمام شہر" data-en="All Cities">تمام شہر</option>
+          <option value="Islamabad">اسلام آباد</option>
+          <option value="Rawalpindi">راولپنڈی</option>
+          <option value="Lahore">لاہور</option>
+          <option value="Karachi">کراچی</option>
+          <option value="Faisalabad">فیصل آباد</option>
+          <option value="Multan">ملتان</option>
+          <option value="Peshawar">پشاور</option>
+          <option value="Quetta">کوئٹہ</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label data-ur="کم از کم ریٹنگ" data-en="Min Rating">کم از کم ریٹنگ</label>
+        <select id="filter-rating">
+          <option value="" data-ur="کوئی بھی" data-en="Any">کوئی بھی</option>
+          <option value="4" data-ur="4+ ستارے ⭐" data-en="4+ Stars ⭐">4+ ستارے ⭐</option>
+          <option value="3" data-ur="3+ ستارے" data-en="3+ Stars">3+ ستارے</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="loadWorkers()" style="width:auto;padding:14px 28px;font-size:15px;">
+        <i class="fas fa-search"></i>
+        <span data-ur="تلاش" data-en="Search">تلاش</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Count -->
+  <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+    <p id="results-count" style="font-size:14px;color:var(--ink-soft);font-family:var(--font-body);"></p>
+  </div>
+
+  <!-- Grid -->
+  <div id="workers-grid" class="workers-grid" style="padding:0;">
+    <div style="grid-column:1/-1;"><?= loadingSkeleton(6) ?></div>
+  </div>
+</main>
+
+<!-- Booking Modal -->
+<div class="uj-modal-overlay" id="bookingModal">
+  <div class="uj-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 class="modal-title" id="modal-worker-name">بکنگ کریں</h3>
+    <p class="modal-subtitle" id="modal-worker-cat"></p>
+
+    <div id="modal-alert" class="uj-alert"></div>
+
+    <form id="bookingForm">
+      <input type="hidden" id="bk-worker-id"/>
+      <input type="hidden" id="bk-category-id"/>
+      <input type="hidden" id="bk-hourly-rate"/>
+
+      <div class="field">
+        <label data-ur="کام کی تفصیل *" data-en="Service Description *">کام کی تفصیل *</label>
+        <textarea id="service_description" rows="3"
+          data-ph-ur="کیا کام کروانا ہے؟ تفصیل سے بتائیں..."
+          data-ph-en="What work needs to be done? Describe in detail..."
+          placeholder="کیا کام کروانا ہے؟ تفصیل سے بتائیں..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label data-ur="پتہ *" data-en="Address *">پتہ *</label>
+        <input type="text" id="bk-address"
+          data-ph-ur="گھر کا پتہ"
+          data-ph-en="Home address"
+          placeholder="گھر کا پتہ" required/>
+      </div>
+
+      <div class="two-col">
+        <div class="field" style="margin-bottom:0;">
+          <label data-ur="تاریخ *" data-en="Date *">تاریخ *</label>
+          <input type="date" id="scheduled_date" required/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label data-ur="وقت *" data-en="Time *">وقت *</label>
+          <input type="time" id="scheduled_time" required/>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:16px;">
+        <div class="field" style="margin-bottom:0;">
+          <label data-ur="تخمینہ گھنٹے" data-en="Est. Hours">تخمینہ گھنٹے</label>
+          <select id="estimated_hours" onchange="updatePrice()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label data-ur="ادائیگی کا طریقہ" data-en="Payment">ادائیگی کا طریقہ</label>
+          <select id="payment_method">
+            <option value="cash" data-ur="نقد" data-en="Cash">نقد</option>
+            <option value="easypaisa">EasyPaisa</option>
+            <option value="jazzcash">JazzCash</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:14px 18px;background:var(--cream-mid);border-radius:var(--radius-sm);border:1.5px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;color:var(--ink-mid);">💰 تخمینہ رقم:</span>
+          <span class="en-only" style="display:none;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--ink-soft);">💰 Estimated Amount:</span>
+          <strong id="estimated-price" style="font-family:var(--font-display);font-size:22px;color:var(--flame);">—</strong>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="bookBtn"
+        style="width:100%;justify-content:center;font-size:17px;padding:16px;margin-top:16px;"
+        data-ur="بکنگ بھیجیں" data-en="Send Booking">
+        <div class="spin"></div>
+        <span class="btn-text" data-ur="📅 بکنگ بھیجیں" data-en="📅 Send Booking">📅 بکنگ بھیجیں</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+let currentRate = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  buildSidebar('workers');
+
+  document.getElementById('scheduled_date').min = new Date().toISOString().split('T')[0];
+
+  // Load categories
+  $.get(`${API_BASE}/workers/categories`, function(res) {
+    if (res.success) {
+      res.categories.forEach(c => {
+        $('#filter-category').append(`<option value="${c.id}">${c.name}</option>`);
+      });
+      // URL param
+      const urlCat = new URLSearchParams(window.location.search).get('cat');
+      if (urlCat) { $('#filter-category').val(urlCat); }
+    }
+    loadWorkers();
+  });
+});
+
+function loadWorkers() {
+  const cat  = $('#filter-category').val();
+  const city = $('#filter-city').val();
+  const rate = $('#filter-rating').val();
+
+  let params = [];
+  if (cat)  params.push(`category_id=${cat}`);
+  if (city) params.push(`city=${city}`);
+  if (rate) params.push(`min_rating=${rate}`);
+
+  const q = params.length ? '?' + params.join('&') : '';
+  const grid = document.getElementById('workers-grid');
+  grid.innerHTML = `<div style="grid-column:1/-1;">${loadingSkeleton(6)}</div>`;
+
+  $.ajax({
+    url: `${API_BASE}/workers${q}`,
+    headers: authHeader(),
+    success: function(res) {
+      if (!res.success || !res.workers.length) {
+        document.getElementById('results-count').textContent = '';
+        grid.innerHTML = `<div style="grid-column:1/-1;" class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3 data-ur="کوئی کاریگر نہیں ملا" data-en="No workers found">کوئی کاریگر نہیں ملا</h3>
+          <p data-ur="فلٹر تبدیل کریں" data-en="Try changing filters">فلٹر تبدیل کریں</p>
+        </div>`;
+        Lang.apply(); return;
+      }
+
+      document.getElementById('results-count').textContent = `${res.workers.length} worker(s) found`;
+
+      const colors = ['#E8400C','#2563EB','#059669','#7C3AED','#D97706','#DC2626'];
+      let html = '';
+
+      res.workers.forEach((w, i) => {
+        const badge = w.verification_badge !== 'none'
+          ? `<span class="badge ${w.verification_badge==='premium'?'badge-gold':'badge-green'}" style="position:absolute;top:16px;right:16px;">
+              ${w.verification_badge==='premium'?'⭐ Premium':'✅ Verified'}
+             </span>`
+          : '';
+
+        const avail = w.is_available
+          ? `<span style="color:#059669;font-size:12px;font-weight:700;font-family:var(--font-body);">● <span data-ur="دستیاب" data-en="Available">دستیاب</span></span>`
+          : `<span style="color:#DC2626;font-size:12px;font-weight:700;font-family:var(--font-body);">● <span data-ur="مصروف" data-en="Busy">مصروف</span></span>`;
+
+        html += `
+          <div class="worker-card">
+            ${badge}
+            <div class="worker-avatar" style="background:linear-gradient(135deg,${colors[i%colors.length]},${colors[(i+1)%colors.length]});">
+              ${w.full_name.charAt(0)}
+            </div>
+            <div class="worker-name">${w.full_name}</div>
+            <div class="worker-category"><i class="fas ${w.category_icon||'fa-tools'}"></i> ${w.category_name}</div>
+            <div class="worker-meta">
+              <div><i class="fas fa-map-marker-alt"></i> ${w.city}${w.area?', '+w.area:''}</div>
+              <div><i class="fas fa-briefcase"></i>
+                <span class="ur-only">${w.experience_years||0} سال تجربہ</span>
+                <span class="en-only" style="display:none;">${w.experience_years||0} years exp</span>
+              </div>
+              <div><i class="fas fa-tools"></i> ${(w.skills||'Multiple skills').substring(0,35)}...</div>
+              <div style="margin-top:4px;">${avail}</div>
+            </div>
+            <div class="worker-footer">
+              <span class="worker-rate">₨${w.hourly_rate||'—'}<small style="font-size:12px;font-weight:500;color:var(--ink-soft);">/hr</small></span>
+              <span class="worker-rating">
+                <i class="fas fa-star star"></i> ${w.avg_rating||'0'}
+                <span style="color:var(--ink-faint);">(${w.total_jobs||0})</span>
+              </span>
+            </div>
+            ${w.is_available
+              ? `<button onclick="openBooking(${w.id},'${w.full_name.replace(/'/g,"\\'")}',${w.category_id},'${w.category_name}',${w.hourly_rate||0})"
+                  class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;font-size:15px;padding:12px;">
+                  <i class="fas fa-calendar-plus"></i>
+                  <span data-ur="بک کریں" data-en="Book Now">بک کریں</span>
+                </button>`
+              : `<button disabled style="width:100%;margin-top:14px;padding:12px;border-radius:30px;border:none;
+                  background:var(--border);color:var(--ink-faint);font-weight:700;font-size:14px;cursor:not-allowed;">
+                  <span data-ur="ابھی دستیاب نہیں" data-en="Not Available">ابھی دستیاب نہیں</span>
+                </button>`
+            }
+          </div>`;
+      });
+
+      grid.innerHTML = html;
+      Lang.apply();
+    },
+    error: function() {
+      grid.innerHTML = `<div style="grid-column:1/-1;" class="empty-state">
+        <p data-ur="لوڈ نہیں ہو سکا" data-en="Could not load">لوڈ نہیں ہو سکا</p>
+      </div>`;
+    }
+  });
+}
+
+function openBooking(wId, wName, catId, catName, hourlyRate) {
+  currentRate = hourlyRate;
+  document.getElementById('bk-worker-id').value = wId;
+  document.getElementById('bk-category-id').value = catId;
+  document.getElementById('bk-hourly-rate').value = hourlyRate;
+  document.getElementById('modal-worker-name').textContent = wName;
+  document.getElementById('modal-worker-cat').textContent = catName;
+  updatePrice();
+  document.getElementById('bookingModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('bookingModal').classList.remove('show');
+  document.getElementById('bookingForm').reset();
+}
+
+function updatePrice() {
+  const hrs = parseInt(document.getElementById('estimated_hours').value) || 1;
+  const total = currentRate * hrs;
+  document.getElementById('estimated-price').textContent = total ? `₨${total.toLocaleString()}` : '—';
+}
+
+$('#bookingForm').on('submit', function(e) {
+  e.preventDefault();
+
+  const alertEl = document.getElementById('modal-alert');
+
+  // Manual validation
+  const service_description = $('#service_description').val().trim();
+  const address             = $('#bk-address').val().trim();
+  const scheduled_date      = $('#scheduled_date').val();
+  const scheduled_time      = $('#scheduled_time').val();
+  const worker_id           = parseInt($('#bk-worker-id').val());
+  const category_id         = parseInt($('#bk-category-id').val());
+
+  if (!service_description || !address || !scheduled_date || !scheduled_time) {
+    alertEl.className = 'uj-alert uj-alert-error show';
+    alertEl.textContent = Lang.current === 'en'
+      ? 'Please fill: Service Description, Address, Date and Time.'
+      : 'براہ کرم تفصیل، پتہ، تاریخ اور وقت بھریں۔';
+    return;
+  }
+
+  alertEl.classList.remove('show');
+  setLoading('bookBtn', true);
+
+  const user = Auth.getUser();
+
+  const data = {
+    worker_id,
+    category_id,
+    service_description,
+    address,
+    city:            user?.city || 'Rawalpindi',
+    scheduled_date,
+    scheduled_time,
+    estimated_hours: parseInt($('#estimated_hours').val()) || 1,
+    payment_method:  $('#payment_method').val() || 'cash'
+  };
+
+  $.ajax({
+    url: `${API_BASE}/bookings`,
+    method: 'POST',
+    headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify(data),
+    success: function(res) {
+      if (res.success) {
+        closeModal();
+        alert(Lang.current === 'en'
+          ? `✅ Booking sent! Total: ₨${res.total_amount}\nWorker will confirm soon.`
+          : `✅ بکنگ بھیج دی گئی! رقم: ₨${res.total_amount}\nکاریگر جلد تصدیق کرے گا۔`);
+        window.location.href = '/my-bookings';
+      }
+    },
+    error: function(xhr) {
+      alertEl.className = 'uj-alert uj-alert-error show';
+      alertEl.textContent = xhr.responseJSON?.message || (Lang.current === 'en' ? 'Booking failed. Try again.' : 'بکنگ ناکام ہو گئی۔');
+      setLoading('bookBtn', false);
+    }
+  });
+});
+</script>
+</body>
+</html>

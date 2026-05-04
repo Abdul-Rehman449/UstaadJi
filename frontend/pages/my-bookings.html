@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>میری بکنگز — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+  <div class="page-header">
+    <h1 class="page-title-ur ur-only">میری <span style="color:var(--flame)">بکنگز</span> 📅</h1>
+    <h1 class="page-title en-only" style="display:none;">My <span>Bookings</span> 📅</h1>
+    <p class="page-subtitle" data-ur="اپنی تمام بکنگز ایک جگہ" data-en="All your bookings in one place">اپنی تمام بکنگز ایک جگہ</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterBy('all',this)" data-ur="سب" data-en="All">سب</button>
+    <button class="filter-tab" onclick="filterBy('pending',this)" data-ur="زیر التواء" data-en="Pending">زیر التواء</button>
+    <button class="filter-tab" onclick="filterBy('accepted',this)" data-ur="قبول شدہ" data-en="Accepted">قبول شدہ</button>
+    <button class="filter-tab" onclick="filterBy('in_progress',this)" data-ur="جاری" data-en="In Progress">جاری</button>
+    <button class="filter-tab" onclick="filterBy('completed',this)" data-ur="مکمل" data-en="Completed">مکمل</button>
+    <button class="filter-tab" onclick="filterBy('cancelled',this)" data-ur="منسوخ" data-en="Cancelled">منسوخ</button>
+  </div>
+
+  <div id="bookings-list"></div>
+</main>
+
+<!-- Review Modal -->
+<div class="uj-modal-overlay" id="reviewModal">
+  <div class="uj-modal" style="max-width:460px;">
+    <button class="modal-close" onclick="$('#reviewModal').removeClass('show')">✕</button>
+    <h3 class="modal-title" data-ur="جائزہ دیں ⭐" data-en="Leave a Review ⭐">جائزہ دیں ⭐</h3>
+    <p class="modal-subtitle" data-ur="کاریگر کی کارکردگی کو ریٹ کریں" data-en="Rate the worker's performance">کاریگر کی کارکردگی کو ریٹ کریں</p>
+
+    <div id="review-alert" class="uj-alert"></div>
+    <form id="reviewForm">
+      <input type="hidden" id="review-booking-id"/>
+
+      <div class="field">
+        <label data-ur="ریٹنگ *" data-en="Rating *">ریٹنگ *</label>
+        <div class="star-picker" id="star-picker">
+          <span class="star" onclick="setRating(1)">☆</span>
+          <span class="star" onclick="setRating(2)">☆</span>
+          <span class="star" onclick="setRating(3)">☆</span>
+          <span class="star" onclick="setRating(4)">☆</span>
+          <span class="star" onclick="setRating(5)">☆</span>
+        </div>
+        <input type="hidden" id="review-rating"/>
+      </div>
+
+      <div class="field">
+        <label data-ur="تبصرہ" data-en="Comment">تبصرہ</label>
+        <textarea id="review-comment" rows="3"
+          data-ph-ur="کاریگر کے بارے میں لکھیں..."
+          data-ph-en="Write about the worker..."
+          placeholder="کاریگر کے بارے میں لکھیں..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary" id="reviewBtn"
+        style="width:100%;justify-content:center;font-size:17px;padding:16px;"
+        data-ur="جائزہ جمع کریں" data-en="Submit Review">
+        <div class="spin"></div>
+        <span class="btn-text" data-ur="جائزہ جمع کریں" data-en="Submit Review">جائزہ جمع کریں</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+let allBookings = [];
+let selectedRating = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  buildSidebar('my-bookings');
+  loadBookings();
+});
+
+function loadBookings() {
+  document.getElementById('bookings-list').innerHTML = loadingSkeleton(4);
+
+  $.ajax({
+    url: `${API_BASE}/bookings/my`,
+    headers: authHeader(),
+    success: function(res) {
+      allBookings = res.bookings || [];
+      renderBookings(allBookings);
+    },
+    error: function() {
+      document.getElementById('bookings-list').innerHTML = `<div class="empty-state"><p data-ur="لوڈ نہیں ہو سکا" data-en="Could not load">لوڈ نہیں ہو سکا</p></div>`;
+    }
+  });
+}
+
+function filterBy(status, btn) {
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBookings(status === 'all' ? allBookings : allBookings.filter(b => b.status === status));
+}
+
+function renderBookings(list) {
+  if (!list.length) {
+    document.getElementById('bookings-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3 data-ur="کوئی بکنگ نہیں" data-en="No bookings">کوئی بکنگ نہیں</h3>
+        <p data-ur="ابھی کاریگر بک کریں!" data-en="Book a worker now!">ابھی کاریگر بک کریں!</p>
+        <a href="/workers" class="btn-primary" style="display:inline-flex;margin-top:20px;">
+          <span data-ur="کاریگر تلاش کریں" data-en="Find Worker">کاریگر تلاش کریں</span>
+        </a>
+      </div>`;
+    Lang.apply(); return;
+  }
+
+  let html = '';
+  list.forEach(b => {
+    const reviewBtn = b.status === 'completed'
+      ? `<button onclick="openReview(${b.id})" class="btn-primary" style="padding:10px 22px;font-size:14px;">
+          <i class="fas fa-star"></i>
+          <span data-ur="جائزہ دیں" data-en="Review">جائزہ دیں</span>
+        </button>`
+      : '';
+
+    html += `
+      <div class="booking-card">
+        <div class="booking-card-header">
+          <div class="booking-person">
+            <div class="booking-person-avatar" style="background:linear-gradient(135deg,var(--flame),var(--flame-soft));">
+              ${b.worker_name.charAt(0)}
+            </div>
+            <div>
+              <div class="booking-person-name">${b.worker_name}</div>
+              <div class="booking-person-sub">${b.category_name}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <strong style="font-family:var(--font-display);font-size:20px;color:var(--flame);">₨${b.total_amount||'—'}</strong>
+            ${statusBadge(b.status)}
+          </div>
+        </div>
+        <div class="booking-card-body">
+          <div class="booking-detail-row"><i class="fas fa-clipboard"></i> ${b.service_description}</div>
+          <div class="booking-detail-row"><i class="fas fa-map-marker-alt"></i> ${b.address}</div>
+          <div class="booking-detail-row"><i class="fas fa-calendar"></i> ${fmtDate(b.scheduled_date)} — ${b.scheduled_time}</div>
+          <div class="booking-detail-row"><i class="fas fa-credit-card"></i>
+            <span data-ur="ادائیگی: " data-en="Payment: ">ادائیگی: </span>${b.payment_method}
+          </div>
+          ${b.booking_card_actions ? `<div class="booking-actions">${reviewBtn}</div>` : ''}
+        </div>
+        ${reviewBtn ? `<div style="padding:0 22px 18px;"><div class="booking-actions">${reviewBtn}</div></div>` : ''}
+      </div>`;
+  });
+
+  document.getElementById('bookings-list').innerHTML = html;
+  Lang.apply();
+}
+
+function openReview(bookingId) {
+  document.getElementById('review-booking-id').value = bookingId;
+  selectedRating = 0;
+  setRating(0);
+  document.getElementById('reviewModal').classList.add('show');
+}
+
+function setRating(n) {
+  selectedRating = n;
+  document.getElementById('review-rating').value = n;
+  document.querySelectorAll('.star-picker .star').forEach((s, i) => {
+    s.textContent = i < n ? '⭐' : '☆';
+    s.style.transform = i < n ? 'scale(1.1)' : '';
+  });
+}
+
+$('#reviewForm').on('submit', function(e) {
+  e.preventDefault();
+  if (!selectedRating) {
+    const el = document.getElementById('review-alert');
+    el.className = 'uj-alert uj-alert-error show';
+    el.textContent = Lang.current==='en' ? 'Please select a rating!' : 'ریٹنگ ضرور دیں!';
+    return;
+  }
+  setLoading('reviewBtn', true);
+
+  $.ajax({
+    url: `${API_BASE}/bookings/review`,
+    method: 'POST',
+    headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify({
+      booking_id: parseInt($('#review-booking-id').val()),
+      rating: selectedRating,
+      comment: $('#review-comment').val().trim()
+    }),
+    success: function(res) {
+      if (res.success) {
+        $('#reviewModal').removeClass('show');
+        alert(Lang.current==='en' ? '✅ Review submitted! Thank you!' : '✅ جائزہ جمع ہو گیا! شکریہ!');
+        loadBookings();
+      }
+    },
+    error: function(xhr) {
+      const el = document.getElementById('review-alert');
+      el.className = 'uj-alert uj-alert-error show';
+      el.textContent = xhr.responseJSON?.message || 'جائزہ جمع نہیں ہو سکا۔';
+      setLoading('reviewBtn', false);
+    }
+  });
+});
+</script>
+</body>
+</html>

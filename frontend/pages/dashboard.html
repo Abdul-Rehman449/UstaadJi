@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ڈیش بورڈ — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+
+  <!-- Page Header -->
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <h1 class="page-title-ur ur-only" id="welcome-title-ur">خوش آمدید! 👋</h1>
+      <h1 class="page-title en-only" style="display:none;" id="welcome-title-en">Welcome! 👋</h1>
+      <p class="page-subtitle" id="current-date"></p>
+    </div>
+    <a href="/workers" class="btn-primary" style="font-size:15px;padding:13px 28px;">
+      <i class="fas fa-search"></i>
+      <span data-ur="کاریگر تلاش کریں" data-en="Find Worker">کاریگر تلاش کریں</span>
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-calendar-check" style="color:var(--flame);"></i></div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-label" data-ur="کل بکنگز" data-en="Total Bookings">کل بکنگز</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fas fa-check-circle" style="color:#059669;"></i></div>
+      <div class="stat-value" id="stat-completed">0</div>
+      <div class="stat-label" data-ur="مکمل" data-en="Completed">مکمل</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon"><i class="fas fa-clock" style="color:var(--gold-deep);"></i></div>
+      <div class="stat-value" id="stat-pending">0</div>
+      <div class="stat-label" data-ur="زیر التواء" data-en="Pending">زیر التواء</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fas fa-star" style="color:#2563EB;"></i></div>
+      <div class="stat-value" id="stat-reviews">0</div>
+      <div class="stat-label" data-ur="جائزے دیے" data-en="Reviews Given">جائزے دیے</div>
+    </div>
+  </div>
+
+  <!-- AI Box -->
+  <div class="ai-hero-box">
+    <h2 data-ur="🤖 AI سے بہترین کاریگر تلاش کریں" data-en="🤖 AI-Powered Worker Recommendation">🤖 AI سے بہترین کاریگر تلاش کریں</h2>
+    <p data-ur="اپنا مسئلہ بتائیں — Claude AI آپ کے شہر میں بہترین کاریگر تجویز کرے گا اور وجہ بھی بتائے گا!" data-en="Describe your problem — Claude AI recommends the best worker in your city and explains why!">اپنا مسئلہ بتائیں — Claude AI آپ کے شہر میں بہترین کاریگر تجویز کرے گا اور وجہ بھی بتائے گا!</p>
+    <a href="/ai-recommend" class="btn-primary" style="font-size:16px;padding:14px 32px;">
+      <i class="fas fa-magic"></i>
+      <span data-ur="AI سے پوچھیں" data-en="Ask AI">AI سے پوچھیں</span>
+    </a>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="uj-card">
+    <div class="uj-card-header">
+      <h3>
+        <i class="fas fa-bolt" style="color:var(--gold-deep);"></i>
+        <span data-ur="فوری اقدام" data-en="Quick Actions">فوری اقدام</span>
+      </h3>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;">
+      <a href="/workers?cat=1" style="text-decoration:none;">
+        <div class="service-quick-btn" style="background:#fff8f0;border-radius:var(--radius-md);padding:20px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.25s;"
+          onmouseover="this.style.borderColor='var(--flame)';this.style.transform='translateY(-3px)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div style="font-size:30px;margin-bottom:8px;">⚡</div>
+          <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;font-weight:700;color:var(--ink);">الیکٹریشن</span>
+          <span class="en-only" style="display:none;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--ink);">Electrician</span>
+        </div>
+      </a>
+      <a href="/workers?cat=2" style="text-decoration:none;">
+        <div style="background:#f0f7ff;border-radius:var(--radius-md);padding:20px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.25s;"
+          onmouseover="this.style.borderColor='var(--flame)';this.style.transform='translateY(-3px)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div style="font-size:30px;margin-bottom:8px;">🔧</div>
+          <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;font-weight:700;color:var(--ink);">پلمبر</span>
+          <span class="en-only" style="display:none;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--ink);">Plumber</span>
+        </div>
+      </a>
+      <a href="/workers?cat=3" style="text-decoration:none;">
+        <div style="background:#f0fff7;border-radius:var(--radius-md);padding:20px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.25s;"
+          onmouseover="this.style.borderColor='var(--flame)';this.style.transform='translateY(-3px)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div style="font-size:30px;margin-bottom:8px;">🪚</div>
+          <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;font-weight:700;color:var(--ink);">کارپینٹر</span>
+          <span class="en-only" style="display:none;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--ink);">Carpenter</span>
+        </div>
+      </a>
+      <a href="/workers?cat=5" style="text-decoration:none;">
+        <div style="background:#f0f4ff;border-radius:var(--radius-md);padding:20px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.25s;"
+          onmouseover="this.style.borderColor='var(--flame)';this.style.transform='translateY(-3px)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div style="font-size:30px;margin-bottom:8px;">❄️</div>
+          <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;font-weight:700;color:var(--ink);">AC ٹیکنیشن</span>
+          <span class="en-only" style="display:none;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--ink);">AC Tech</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent Bookings -->
+  <div class="uj-card">
+    <div class="uj-card-header">
+      <h3>
+        <i class="fas fa-history" style="color:var(--flame);"></i>
+        <span data-ur="حالیہ بکنگز" data-en="Recent Bookings">حالیہ بکنگز</span>
+      </h3>
+      <a href="/my-bookings" class="btn-ghost">
+        <span data-ur="سب دیکھیں" data-en="View All">سب دیکھیں</span>
+        <i class="fas fa-arrow-left ur-only"></i>
+        <i class="fas fa-arrow-right en-only" style="display:none;"></i>
+      </a>
+    </div>
+    <div id="recent-bookings"></div>
+  </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  buildSidebar('dashboard');
+
+  const user = Auth.getUser();
+  if (!user || user.role !== 'customer') { window.location.href='/login'; return; }
+
+  const firstName = user.full_name.split(' ')[0];
+  document.getElementById('welcome-title-ur').textContent = `خوش آمدید، ${firstName}! 👋`;
+  document.getElementById('welcome-title-en').textContent = `Welcome, ${firstName}! 👋`;
+
+  const now = new Date();
+  document.getElementById('current-date').textContent = now.toLocaleDateString('en-PK', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Load bookings
+  document.getElementById('recent-bookings').innerHTML = loadingSkeleton(3);
+
+  $.ajax({
+    url: `${API_BASE}/bookings/my`,
+    headers: authHeader(),
+    success: function(res) {
+      const bookings = res.bookings || [];
+      document.getElementById('stat-total').textContent     = bookings.length;
+      document.getElementById('stat-completed').textContent = bookings.filter(b => b.status==='completed').length;
+      document.getElementById('stat-pending').textContent   = bookings.filter(b => b.status==='pending').length;
+      document.getElementById('stat-reviews').textContent   = bookings.filter(b => b.status==='completed').length;
+
+      if (!bookings.length) {
+        document.getElementById('recent-bookings').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3 data-ur="ابھی تک کوئی بکنگ نہیں" data-en="No bookings yet">ابھی تک کوئی بکنگ نہیں</h3>
+            <p data-ur="پہلا کاریگر بک کریں!" data-en="Book your first worker!">پہلا کاریگر بک کریں!</p>
+            <a href="/workers" class="btn-primary" style="margin-top:20px;display:inline-flex;">
+              <span data-ur="کاریگر تلاش کریں" data-en="Find Worker">کاریگر تلاش کریں</span>
+            </a>
+          </div>`;
+        Lang.apply();
+        return;
+      }
+
+      let html = '<div style="overflow-x:auto;"><table class="uj-table"><thead><tr>';
+      html += `<th data-ur="کاریگر" data-en="Worker">کاریگر</th>`;
+      html += `<th data-ur="خدمت" data-en="Service">خدمت</th>`;
+      html += `<th data-ur="تاریخ" data-en="Date">تاریخ</th>`;
+      html += `<th data-ur="رقم" data-en="Amount">رقم</th>`;
+      html += `<th data-ur="حالت" data-en="Status">حالت</th>`;
+      html += '</tr></thead><tbody>';
+
+      bookings.slice(0,6).forEach(b => {
+        html += `<tr>
+          <td><div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--flame),var(--flame-soft));
+              display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;font-family:var(--font-display);flex-shrink:0;">
+              ${b.worker_name.charAt(0)}
+            </div>
+            <span style="font-weight:700;">${b.worker_name}</span>
+          </div></td>
+          <td>${b.category_name}</td>
+          <td>${fmtDate(b.scheduled_date)}</td>
+          <td><strong style="color:var(--flame);">₨${b.total_amount||'—'}</strong></td>
+          <td>${statusBadge(b.status)}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      document.getElementById('recent-bookings').innerHTML = html;
+      Lang.apply();
+    },
+    error: function() {
+      document.getElementById('recent-bookings').innerHTML = `<div class="empty-state"><p data-ur="لوڈ نہیں ہو سکا" data-en="Could not load">لوڈ نہیں ہو سکا</p></div>`;
+    }
+  });
+});
+</script>
+</body>
+</html>

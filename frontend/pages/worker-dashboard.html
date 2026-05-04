@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ورکر ڈیش بورڈ — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css"/>
+</head>
+<body>
+
+<div id="uj-sidebar" class="uj-sidebar"></div>
+
+<main class="uj-main">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <h1 class="page-title-ur ur-only">ورکر <span style="color:var(--flame)">ڈیش بورڈ</span> 🔧</h1>
+      <h1 class="page-title en-only" style="display:none;">Worker <span>Dashboard</span> 🔧</h1>
+      <p class="page-subtitle" id="current-date"></p>
+    </div>
+    <!-- Availability Toggle -->
+    <div class="avail-toggle" id="availToggle" onclick="toggleAvailability()">
+      <div class="avail-dot" id="avail-dot"></div>
+      <span class="ur-only" style="font-family:var(--font-urdu);font-size:16px;" id="avail-label-ur">دستیاب</span>
+      <span class="en-only" style="display:none;" id="avail-label-en">Available</span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-calendar-check" style="color:var(--flame);"></i></div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-label" data-ur="کل کام" data-en="Total Jobs">کل کام</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fas fa-check-double" style="color:#059669;"></i></div>
+      <div class="stat-value" id="stat-completed">0</div>
+      <div class="stat-label" data-ur="مکمل" data-en="Completed">مکمل</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon"><i class="fas fa-money-bill-wave" style="color:var(--gold-deep);"></i></div>
+      <div class="stat-value" id="stat-earned">₨0</div>
+      <div class="stat-label" data-ur="کل کمائی" data-en="Total Earned">کل کمائی</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fas fa-star" style="color:#2563EB;"></i></div>
+      <div class="stat-value" id="stat-rating">0.0</div>
+      <div class="stat-label" data-ur="اوسط ریٹنگ" data-en="Avg Rating">اوسط ریٹنگ</div>
+    </div>
+  </div>
+
+  <!-- Bookings -->
+  <div class="uj-card">
+    <div class="uj-card-header">
+      <h3>
+        <i class="fas fa-list" style="color:var(--flame);"></i>
+        <span data-ur="بکنگ درخواستیں" data-en="Booking Requests">بکنگ درخواستیں</span>
+      </h3>
+      <div class="filter-tabs" style="margin-bottom:0;gap:6px;">
+        <button class="filter-tab active" onclick="showTab('pending',this)" id="tab-pending"
+          data-ur="نئی" data-en="New">نئی</button>
+        <button class="filter-tab" onclick="showTab('accepted',this)"
+          data-ur="جاری" data-en="Active">جاری</button>
+        <button class="filter-tab" onclick="showTab('completed',this)"
+          data-ur="مکمل" data-en="Done">مکمل</button>
+      </div>
+    </div>
+    <div id="bookings-container" style="padding:20px;"></div>
+  </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/dashboard.js"></script>
+<script>
+let isAvailable = true;
+
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  const user = Auth.getUser();
+  if (!user || user.role !== 'worker') { window.location.href='/login'; return; }
+  buildSidebar('worker-dashboard');
+
+  document.getElementById('current-date').textContent =
+    new Date().toLocaleDateString('en-PK', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Load stats
+  $.ajax({
+    url: `${API_BASE}/workers/my-stats`,
+    headers: authHeader(),
+    success: function(res) {
+      if (res.success) {
+        document.getElementById('stat-total').textContent     = res.stats.total_jobs || 0;
+        document.getElementById('stat-completed').textContent = res.stats.completed || 0;
+        document.getElementById('stat-earned').textContent    = '₨' + parseInt(res.stats.total_earned||0).toLocaleString();
+        document.getElementById('stat-rating').textContent    = parseFloat(res.stats.avg_rating||0).toFixed(1);
+      }
+    }
+  });
+
+  showTab('pending');
+});
+
+function showTab(status, btn) {
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadWorkerBookings(status);
+}
+
+function loadWorkerBookings(status) {
+  document.getElementById('bookings-container').innerHTML = loadingSkeleton(3);
+
+  $.ajax({
+    url: `${API_BASE}/bookings/worker?status=${status}`,
+    headers: authHeader(),
+    success: function(res) {
+      const bookings = res.bookings || [];
+      if (!bookings.length) {
+        document.getElementById('bookings-container').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3 data-ur="کوئی ${status==='pending'?'نئی':''}بکنگ نہیں" data-en="No ${status} bookings">کوئی بکنگ نہیں</h3>
+          </div>`;
+        Lang.apply(); return;
+      }
+
+      let html = '';
+      bookings.forEach(b => {
+        let actionBtns = '';
+        if (status === 'pending') {
+          actionBtns = `
+            <button onclick="updateStatus(${b.id},'accepted')" class="btn-primary" style="padding:10px 22px;font-size:14px;">
+              <i class="fas fa-check"></i>
+              <span data-ur="قبول کریں" data-en="Accept">قبول کریں</span>
+            </button>
+            <button onclick="updateStatus(${b.id},'rejected')" class="btn-outline" style="padding:10px 22px;font-size:14px;border-color:var(--danger);color:var(--danger);">
+              <i class="fas fa-times"></i>
+              <span data-ur="مسترد کریں" data-en="Reject">مسترد کریں</span>
+            </button>`;
+        } else if (status === 'accepted') {
+          actionBtns = `
+            <button onclick="updateStatus(${b.id},'completed')" class="btn-primary" style="padding:10px 22px;font-size:14px;">
+              <i class="fas fa-check-double"></i>
+              <span data-ur="مکمل کریں" data-en="Mark Complete">مکمل کریں</span>
+            </button>`;
+        }
+
+        html += `
+          <div class="booking-card">
+            <div class="booking-card-header">
+              <div class="booking-person">
+                <div class="booking-person-avatar" style="background:linear-gradient(135deg,#2563EB,#60A5FA);">
+                  ${b.customer_name.charAt(0)}
+                </div>
+                <div>
+                  <div class="booking-person-name">${b.customer_name}</div>
+                  <div class="booking-person-sub">${b.customer_phone||''}</div>
+                </div>
+              </div>
+              <strong style="font-family:var(--font-display);font-size:22px;color:var(--flame);">₨${b.total_amount||'—'}</strong>
+            </div>
+            <div class="booking-card-body">
+              <div class="booking-detail-row"><i class="fas fa-clipboard"></i> ${b.service_description}</div>
+              <div class="booking-detail-row"><i class="fas fa-map-marker-alt"></i> ${b.address}</div>
+              <div class="booking-detail-row"><i class="fas fa-calendar"></i> ${fmtDate(b.scheduled_date)} — ${b.scheduled_time}</div>
+              <div class="booking-detail-row"><i class="fas fa-clock"></i>
+                <span data-ur="${b.estimated_hours} گھنٹے" data-en="${b.estimated_hours} hours">${b.estimated_hours} گھنٹے</span>
+              </div>
+              ${actionBtns ? `<div class="booking-actions" style="margin-top:14px;">${actionBtns}</div>` : ''}
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('bookings-container').innerHTML = html;
+      Lang.apply();
+    }
+  });
+}
+
+function updateStatus(bookingId, status) {
+  const msg = Lang.current==='en'
+    ? `Mark booking as ${status}?`
+    : `بکنگ ${status==='accepted'?'قبول':'مکمل'} کرنا چاہتے ہیں؟`;
+
+  if (!confirm(msg)) return;
+
+  $.ajax({
+    url: `${API_BASE}/bookings/${bookingId}/status`,
+    method: 'PUT',
+    headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify({ status }),
+    success: function(res) {
+      if (res.success) {
+        showTab(status==='accepted' ? 'accepted' : 'pending');
+      }
+    },
+    error: function() {
+      alert(Lang.current==='en' ? 'Error. Try again.' : 'غلطی ہوئی۔ دوبارہ کوشش کریں۔');
+    }
+  });
+}
+
+function toggleAvailability() {
+  isAvailable = !isAvailable;
+  const toggle = document.getElementById('availToggle');
+  toggle.classList.toggle('on', isAvailable);
+  document.getElementById('avail-label-ur').textContent = isAvailable ? 'دستیاب' : 'مصروف';
+  document.getElementById('avail-label-en').textContent = isAvailable ? 'Available' : 'Busy';
+
+  $.ajax({
+    url: `${API_BASE}/workers/profile`,
+    method: 'PUT',
+    headers: authHeader(),
+    contentType: 'application/json',
+    data: JSON.stringify({ is_available: isAvailable })
+  });
+}
+</script>
+</body>
+</html>

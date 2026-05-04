@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>رجسٹر — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--flame), var(--gold));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ══ Left Panel ══ -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+
+      <div class="auth-brand">
+        <div class="auth-brand-mark">🛠️</div>
+        <span class="auth-brand-name">Ustaad<span>Ji</span></span>
+      </div>
+
+      <div style="margin-bottom:36px;">
+        <div class="lang-toggle" style="display:inline-flex;">
+          <button class="lang-btn active" data-lang="ur">اردو</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </div>
+
+      <h2 data-ur="شامل ہوں! 🎉" data-en="Join Today! 🎉">شامل ہوں! 🎉</h2>
+      <p data-ur="مفت اکاؤنٹ بنائیں اور پاکستان کے بہترین کاریگر پلیٹ فارم کا حصہ بنیں!" data-en="Create a free account and be part of Pakistan's best skilled workers platform!">مفت اکاؤنٹ بنائیں اور پاکستان کے بہترین کاریگر پلیٹ فارم کا حصہ بنیں!</p>
+
+      <ul class="auth-features-list">
+        <li><div class="feat-dot">👤</div><span data-ur="گاہک: کاریگر بک کریں آسانی سے" data-en="Customer: Book workers easily">گاہک: کاریگر بک کریں آسانی سے</span></li>
+        <li><div class="feat-dot">🔧</div><span data-ur="کاریگر: اپنا پروفائل بنائیں، کام پائیں" data-en="Worker: Create profile, get jobs">کاریگر: اپنا پروفائل بنائیں، کام پائیں</span></li>
+        <li><div class="feat-dot">🛡️</div><span data-ur="CNIC تصدیق — مکمل تحفظ" data-en="CNIC Verified — Complete Safety">CNIC تصدیق — مکمل تحفظ</span></li>
+        <li><div class="feat-dot">💰</div><span data-ur="زیادہ کمائیں — ڈیجیٹل ادائیگی" data-en="Earn more — Digital payments">زیادہ کمائیں — ڈیجیٹل ادائیگی</span></li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ══ Right Panel ══ -->
+  <div class="auth-right" style="padding:40px 48px;overflow-y:auto;">
+    <div class="auth-form-wrap" style="max-width:420px;">
+
+      <div class="form-head">
+        <h2 data-ur="نیا اکاؤنٹ بنائیں" data-en="Create Account">نیا اکاؤنٹ بنائیں</h2>
+        <p data-ur="بالکل مفت — ابھی شامل ہوں" data-en="Completely free — join now">بالکل مفت — ابھی شامل ہوں</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress" style="width:33%;"></div>
+      </div>
+
+      <div id="uj-alert" class="uj-alert"></div>
+
+      <!-- ─── STEP 1: Role ─── -->
+      <div id="step-1">
+        <p style="font-family:var(--font-urdu);font-size:16px;font-weight:600;color:var(--ink-mid);margin-bottom:14px;direction:rtl;text-align:right;" class="ur-only">آپ کون ہیں؟</p>
+        <p style="font-family:var(--font-body);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:14px;" class="en-only" style="display:none;">Who are you?</p>
+
+        <div class="role-pick">
+          <div class="role-option" data-role="customer" onclick="selectRole(this)">
+            <span class="role-icon">👤</span>
+            <span class="role-title-ur ur-only">گاہک</span>
+            <span class="role-title-en en-only" style="display:none;">Customer</span>
+            <span class="role-sub" data-ur="کاریگر ڈھونڈنا ہے" data-en="Need a worker">کاریگر ڈھونڈنا ہے</span>
+          </div>
+          <div class="role-option" data-role="worker" onclick="selectRole(this)">
+            <span class="role-icon">🔧</span>
+            <span class="role-title-ur ur-only">کاریگر</span>
+            <span class="role-title-en en-only" style="display:none;">Worker</span>
+            <span class="role-sub" data-ur="کام کرنا ہے" data-en="Want to work">کام کرنا ہے</span>
+          </div>
+        </div>
+        <input type="hidden" id="selectedRole"/>
+
+        <button type="button" onclick="goStep(2)" class="btn-primary" style="width:100%;justify-content:center;font-size:18px;padding:16px;margin-top:8px;">
+          <span data-ur="آگے بڑھیں" data-en="Continue">آگے بڑھیں</span>
+          <i class="fas fa-arrow-left ur-only"></i>
+          <i class="fas fa-arrow-right en-only" style="display:none;"></i>
+        </button>
+      </div>
+
+      <!-- ─── STEP 2: Basic Info ─── -->
+      <div id="step-2" style="display:none;">
+        <form id="registerForm">
+
+          <div class="two-col">
+            <div class="field">
+              <label data-ur="پورا نام *" data-en="Full Name *">پورا نام *</label>
+              <input type="text" id="full_name"
+                data-ph-ur="علی حسن"
+                data-ph-en="Ali Hassan"
+                placeholder="علی حسن" required/>
+            </div>
+            <div class="field">
+              <label data-ur="فون نمبر" data-en="Phone">فون نمبر</label>
+              <input type="text" id="phone"
+                data-ph-ur="03XX-XXXXXXX"
+                data-ph-en="03XX-XXXXXXX"
+                placeholder="03XX-XXXXXXX"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label data-ur="شہر *" data-en="City *">شہر *</label>
+            <select id="city" required>
+              <option value="" data-ur="-- شہر منتخب کریں --" data-en="-- Select City --">-- شہر منتخب کریں --</option>
+              <option value="Islamabad">اسلام آباد — Islamabad</option>
+              <option value="Rawalpindi">راولپنڈی — Rawalpindi</option>
+              <option value="Lahore">لاہور — Lahore</option>
+              <option value="Karachi">کراچی — Karachi</option>
+              <option value="Faisalabad">فیصل آباد — Faisalabad</option>
+              <option value="Multan">ملتان — Multan</option>
+              <option value="Peshawar">پشاور — Peshawar</option>
+              <option value="Quetta">کوئٹہ — Quetta</option>
+            </select>
+          </div>
+
+          <!-- Worker only -->
+          <div class="field" id="cat-field" style="display:none;">
+            <label data-ur="آپ کی خدمت *" data-en="Your Service *">آپ کی خدمت *</label>
+            <select id="category_id">
+              <option value="" data-ur="-- خدمت منتخب کریں --" data-en="-- Select Service --">-- خدمت منتخب کریں --</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label data-ur="ای میل *" data-en="Email *">ای میل *</label>
+            <div class="input-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" id="email" class="has-icon"
+                data-ph-ur="آپ کا ای میل"
+                data-ph-en="your@email.com"
+                placeholder="آپ کا ای میل" required/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label data-ur="پاس ورڈ * (کم از کم ۶ حروف)" data-en="Password * (min. 6 characters)">پاس ورڈ * (کم از کم ۶ حروف)</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" id="password" class="has-icon"
+                data-ph-ur="••••••••"
+                data-ph-en="••••••••"
+                placeholder="••••••••" required/>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;">
+            <button type="button" onclick="goStep(1)" class="btn-outline" style="flex:0.4;justify-content:center;padding:14px;">
+              <i class="fas fa-arrow-right ur-only"></i>
+              <i class="fas fa-arrow-left en-only" style="display:none;"></i>
+              <span data-ur="واپس" data-en="Back">واپس</span>
+            </button>
+            <button type="submit" class="btn-primary" id="registerBtn"
+              style="flex:1;justify-content:center;font-size:17px;padding:16px;"
+              data-ur="اکاؤنٹ بنائیں" data-en="Create Account">
+              <div class="spin"></div>
+              <span class="btn-text" data-ur="اکاؤنٹ بنائیں" data-en="Create Account">اکاؤنٹ بنائیں</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="form-bottom" style="margin-top:20px;">
+        <span data-ur="پہلے سے اکاؤنٹ ہے؟" data-en="Already have an account?">پہلے سے اکاؤنٹ ہے؟</span>
+        <a href="/login" data-ur=" لاگ ان کریں" data-en=" Login"> لاگ ان کریں</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+// Load categories
+$.get(`${API_BASE}/workers/categories`, function(res) {
+  if (res.success) {
+    res.categories.forEach(c => {
+      $('#category_id').append(`<option value="${c.id}">${c.name}</option>`);
+    });
+  }
+});
+
+function selectRole(card) {
+  document.querySelectorAll('.role-option').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('selectedRole').value = card.dataset.role;
+  // Show category for worker
+  document.getElementById('cat-field').style.display = card.dataset.role === 'worker' ? 'block' : 'none';
+}
+
+function goStep(n) {
+  if (n === 2 && !document.getElementById('selectedRole').value) {
+    showAlert('error', 'براہ کرم پہلے اپنا کردار منتخب کریں۔', 'Please select your role first.');
+    return;
+  }
+  document.getElementById('step-1').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('step-2').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('progress').style.width = n === 1 ? '33%' : '66%';
+}
+
+$('#registerForm').on('submit', function(e) {
+  e.preventDefault();
+
+  const role = $('#selectedRole').val();
+  const password = $('#password').val();
+
+  if (password.length < 6) {
+    showAlert('error', 'پاس ورڈ کم از کم ۶ حروف کا ہونا چاہیے۔', 'Password must be at least 6 characters.');
+    return;
+  }
+
+  const data = {
+    full_name: $('#full_name').val().trim(),
+    email: $('#email').val().trim(),
+    password,
+    phone: $('#phone').val().trim(),
+    city: $('#city').val(),
+    role,
+    category_id: role === 'worker' ? $('#category_id').val() : undefined
+  };
+
+  setLoading('registerBtn', true);
+
+  $.ajax({
+    url: `${API_BASE}/auth/register`,
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(data),
+    success: function(res) {
+      if (res.success) {
+        Auth.setToken(res.token);
+        Auth.setUser(res.user);
+        document.getElementById('progress').style.width = '100%';
+        showAlert('success', `اکاؤنٹ بن گیا! خوش آمدید، ${res.user.full_name}!`, `Account created! Welcome, ${res.user.full_name}!`);
+        setTimeout(() => Auth.redirectToDashboard(), 1200);
+      }
+    },
+    error: function(xhr) {
+      const msg = xhr.responseJSON?.message || '';
+      showAlert('error', 'رجسٹریشن ناکام ہو گئی۔ دوبارہ کوشش کریں۔', msg || 'Registration failed.');
+      setLoading('registerBtn', false);
+    }
+  });
+});
+</script>
+</body>
+</html>

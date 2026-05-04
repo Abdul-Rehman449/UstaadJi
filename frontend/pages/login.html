@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لاگ ان — اُستاد جی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ══ Left Panel ══ -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+
+      <div class="auth-brand">
+        <div class="auth-brand-mark">🛠️</div>
+        <span class="auth-brand-name">Ustaad<span>Ji</span></span>
+      </div>
+
+      <!-- Language Toggle -->
+      <div style="margin-bottom:36px;">
+        <div class="lang-toggle" style="display:inline-flex;">
+          <button class="lang-btn active" data-lang="ur">اردو</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </div>
+
+      <h2 data-ur="خوش آمدید! 👋" data-en="Welcome Back! 👋">خوش آمدید! 👋</h2>
+      <p data-ur="پاکستان کا سب سے بہترین کاریگر پلیٹ فارم۔ لاگ ان کریں اور شروع کریں!" data-en="Pakistan's best skilled workers platform. Login and get started!">پاکستان کا سب سے بہترین کاریگر پلیٹ فارم۔ لاگ ان کریں اور شروع کریں!</p>
+
+      <ul class="auth-features-list">
+        <li><div class="feat-dot">⚡</div><span data-ur="الیکٹریشن، پلمبر، کارپینٹر اور بہت کچھ" data-en="Electrician, Plumber, Carpenter & more">الیکٹریشن، پلمبر، کارپینٹر اور بہت کچھ</span></li>
+        <li><div class="feat-dot">🤖</div><span data-ur="AI سے بہترین کاریگر تلاش کریں" data-en="Find best worker with AI">AI سے بہترین کاریگر تلاش کریں</span></li>
+        <li><div class="feat-dot">✅</div><span data-ur="تصدیق شدہ اور قابل اعتماد" data-en="Verified and trustworthy">تصدیق شدہ اور قابل اعتماد</span></li>
+        <li><div class="feat-dot">💳</div><span data-ur="ایزی پیسہ / جاز کیش / نقد" data-en="EasyPaisa / JazzCash / Cash">ایزی پیسہ / جاز کیش / نقد</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Right Panel (Form) ══ -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <div class="form-head">
+        <h2 data-ur="لاگ ان کریں" data-en="Login">لاگ ان کریں</h2>
+        <p data-ur="اپنے اکاؤنٹ میں داخل ہوں" data-en="Access your account">اپنے اکاؤنٹ میں داخل ہوں</p>
+      </div>
+
+      <div id="uj-alert" class="uj-alert"></div>
+
+      <form id="loginForm">
+
+        <div class="field">
+          <label data-ur="ای میل" data-en="Email Address">ای میل</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" class="has-icon"
+              data-ph-ur="آپ کا ای میل"
+              data-ph-en="your@email.com"
+              placeholder="آپ کا ای میل" required/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label data-ur="پاس ورڈ" data-en="Password">پاس ورڈ</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" class="has-icon"
+              data-ph-ur="••••••••"
+              data-ph-en="••••••••"
+              placeholder="••••••••" required/>
+          </div>
+        </div>
+
+        <div style="text-align:left;margin-bottom:24px;" class="en-only" style="display:none;">
+          <a href="#" style="font-size:13px;color:var(--flame);font-weight:600;text-decoration:none;">Forgot password?</a>
+        </div>
+        <div style="text-align:right;margin-bottom:24px;" class="ur-only">
+          <a href="#" style="font-size:15px;color:var(--flame);font-weight:600;text-decoration:none;font-family:var(--font-urdu);">پاس ورڈ بھول گئے؟</a>
+        </div>
+
+        <button type="submit" class="btn-primary" id="loginBtn"
+          style="width:100%;justify-content:center;font-size:18px;padding:18px;"
+          data-ur="لاگ ان کریں" data-en="Login">
+          <div class="spin"></div>
+          <span class="btn-text" data-ur="لاگ ان کریں" data-en="Login">لاگ ان کریں</span>
+          <i class="fas fa-arrow-left ur-only"></i>
+          <i class="fas fa-arrow-right en-only" style="display:none;"></i>
+        </button>
+      </form>
+
+      <!-- Demo -->
+      <div style="margin-top:24px;padding:16px;background:var(--cream-mid);border-radius:var(--radius-sm);border:1.5px dashed var(--border-mid);">
+        <p style="font-size:12px;font-weight:700;color:var(--ink-faint);margin-bottom:8px;font-family:var(--font-body);text-transform:uppercase;letter-spacing:0.5px;">🧪 Demo Credentials</p>
+        <p style="font-size:13px;color:var(--ink-mid);line-height:2;font-family:var(--font-body);">
+          <strong>Admin:</strong> admin@ustaadji.pk / admin123<br/>
+          <strong>Customer/Worker:</strong> Register karein
+        </p>
+      </div>
+
+      <div class="form-bottom">
+        <span data-ur="اکاؤنٹ نہیں ہے؟" data-en="Don't have an account?">اکاؤنٹ نہیں ہے؟</span>
+        <a href="/register" data-ur=" رجسٹر کریں" data-en=" Register"> رجسٹر کریں</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  $('#loginForm').on('submit', function(e) {
+    e.preventDefault();
+
+    const email = $('#email').val().trim();
+    const password = $('#password').val();
+
+    if (!email || !password) {
+      showAlert('error', 'براہ کرم ای میل اور پاس ورڈ درج کریں۔', 'Please enter email and password.');
+      return;
+    }
+
+    setLoading('loginBtn', true);
+
+    $.ajax({
+      url: `${API_BASE}/auth/login`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ email, password }),
+      success: function(res) {
+        if (res.success) {
+          Auth.setToken(res.token);
+          Auth.setUser(res.user);
+          showAlert('success', `خوش آمدید، ${res.user.full_name}!`, `Welcome, ${res.user.full_name}!`);
+          setTimeout(() => Auth.redirectToDashboard(), 1000);
+        }
+      },
+      error: function(xhr) {
+        const msg = xhr.responseJSON?.message || '';
+        showAlert('error', 'ای میل یا پاس ورڈ غلط ہے۔', msg || 'Invalid email or password.');
+        setLoading('loginBtn', false);
+      }
+    });
+  });
+
+});
+</script>
+</body>
+</html>
