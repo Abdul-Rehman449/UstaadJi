@@ -119,4 +119,4 @@ http://localhost:5000
 
 ---
 
-*CUST — Web Engineering Semester Project 2024*
+*CUST — Web Engineering Semester Project 2026*
